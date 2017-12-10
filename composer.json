@@ -1,0 +1,29 @@
+{
+    "name": "leroy/spotify",
+    "description": "Spotify Web Api",
+	"type": "library",
+	"autoload": {
+		"psr-4": {
+			"Lorey\\Spotify\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Lorey\\Spotify\\Tests\\": "tests/"
+		}
+	},
+    "require": {
+        "cupcoffee/reify": "^1.1",
+        "guzzlehttp/guzzle": "^6.3",
+        "league/oauth2-client": "^2.2"
+    },
+    "authors": [
+        {
+            "name": "leroy",
+            "email": "leroy@lorey.nl"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^6.5"
+    }
+}
