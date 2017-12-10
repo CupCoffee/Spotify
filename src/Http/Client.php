@@ -1,6 +1,6 @@
 <?php
 
-namespace Lorey\Spotify\Api\Http;
+namespace Lorey\Spotify\Http;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\RequestException;

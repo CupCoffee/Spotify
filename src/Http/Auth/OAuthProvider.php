@@ -30,7 +30,7 @@ class OAuthProvider extends AbstractProvider
      */
     public function getBaseAuthorizationUrl()
     {
-        return config('spotify.oauth.url.authorize');
+        return 'https://accounts.spotify.com/authorize';
     }
 
     /**
@@ -43,7 +43,7 @@ class OAuthProvider extends AbstractProvider
      */
     public function getBaseAccessTokenUrl(array $params)
     {
-        return config('spotify.oauth.url.token');
+        return 'https://accounts.spotify.com/api/token';
     }
 
     /**
@@ -54,7 +54,7 @@ class OAuthProvider extends AbstractProvider
      */
     public function getResourceOwnerDetailsUrl(AccessToken $token)
     {
-        return config('spotify.oauth.url.owner');
+        return 'https://api.spotify.com/v1/me';
     }
 
     /**
