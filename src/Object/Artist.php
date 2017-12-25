@@ -2,9 +2,6 @@
 
 namespace Lorey\Spotify\Object;
 
-use Illuminate\Support\Collection;
-use Spotify;
-
 class Artist
 {
 	/**
@@ -46,28 +43,4 @@ class Artist
 	 * @var string
 	 */
 	public $uri;
-
-	/**
-	 * @return Collection
-	 */
-	public function getRelatedArtists()
-	{
-		return Spotify::getArtistRelatedArtists($this->id);
-	}
-
-	/**
-	 * @return Collection
-	 */
-	public function getTopTracks()
-	{
-		return Spotify::getArtistTopTracks($this->id);
-	}
-
-	/**
-	 * @return Collection
-	 */
-	public function getAlbums()
-	{
-		return Spotify::getArtistAlbums($this->id);
-	}
 }

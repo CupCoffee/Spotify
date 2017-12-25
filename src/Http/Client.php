@@ -9,6 +9,7 @@ use League\OAuth2\Client\Token\AccessToken;
 use Lorey\Spotify\Http\Auth\OAuthProvider;
 
 use function GuzzleHttp\uri_template;
+use Lorey\Spotify\Spotify;
 use Psr\Http\Message\RequestInterface;
 use Reify\Data\JsonMapper;
 use Reify\Reify;
@@ -35,10 +36,12 @@ class Client
     private function send(RequestInterface $request)
     {
         try {
-            return $this->httpClient->send($request);
+            $response = $this->httpClient->send($request);
+
+            return $response;
         } catch (RequestException $exception) {
-            dump($exception->getResponse()->getBody()->getContents());
-            dump($exception->getMessage());
+            echo $exception->getResponse()->getBody()->getContents();
+            echo $exception->getMessage();
         }
     }
 
@@ -47,7 +50,10 @@ class Client
         $uri = $this->buildUri($endpoint, $parameters);
 
         $request = $this->oAuthProvider->getAuthenticatedRequest('GET', $uri, $this->accessToken, ['body' => json_encode($parameters)]);
-        return Reify::map(new JsonMapper(), $this->send($request)->getBody()->getContents())->to($endpoint->getResponseType());
+        $response = $this->send($request);
+        $json = $response->getBody()->getContents();
+        $mappedResponse = Reify::map(new JsonMapper(), $json)->to($endpoint->getResponseType());
+        return $mappedResponse;
     }
 
     public function post(Endpoint $endpoint, array $parameters = [])
@@ -68,17 +74,25 @@ class Client
 
     private function buildUri(Endpoint $endpoint, array $parameters = null): Uri
     {
-        $uri = new Uri(config('spotify.api.base_uri'));
-        $uri = $uri->withPath(config('spotify.api.version'));
+        $uri = new Uri($this->httpClient->getConfig('base_uri'));
+        $uri = $uri->withPath(Spotify::API_VERSION);
 
         if ($parameters) {
-            $requestParameters = collect($parameters);
+            $requestParameters = $parameters;
 
             $namedParameters = $this->getNamedParametersFromUri($endpoint->getPath());
-            $queryParameters = $requestParameters->except($namedParameters)->keys()->toArray();
+
+            $queryParameters = array_diff_key($requestParameters, array_flip($namedParameters));
+            $queryParameters = array_map(function($value) {
+                if (is_array($value)) {
+                    return implode(",", $value);
+                }
+
+                return $value;
+            }, $queryParameters);
 
             $uri = $uri->withPath($this->buildPath($this->compileParameters($endpoint->getPath(), $parameters)));
-            $uri = $uri->withQuery(http_build_query($requestParameters->only($queryParameters)->toArray()));
+            $uri = $uri->withQuery(http_build_query($queryParameters));
         } else {
             $uri = $uri->withPath($this->buildPath($endpoint->getPath()));
         }
@@ -88,7 +102,7 @@ class Client
 
     private function buildPath($path)
     {
-        return config('spotify.api.version') . '/' . ltrim($path, '/');
+        return Spotify::API_VERSION . '/' . ltrim($path, '/');
     }
 
     private function getNamedParametersFromUri(string $uri): array

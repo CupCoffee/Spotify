@@ -3,28 +3,30 @@
 namespace Lorey\Spotify;
 
 
-use Exception;
-use GuzzleHttp\Psr7\Uri;
-use Illuminate\Support\Facades\Input;
-use Illuminate\Support\Facades\Session;
+use Lorey\Spotify\Endpoints\Albums;
+use Lorey\Spotify\Endpoints\Artists;
+use Lorey\Spotify\Endpoints\Tracks;
 use Lorey\Spotify\Http\Endpoint;
-use Lorey\Spotify\Http\Auth\OAuthProvider;
-use Lorey\Spotify\Http\Client as ApiClient;
+use Lorey\Spotify\Http\Client;
 use Lorey\Spotify\Object\CurrentlyPlayingContext;
 use Lorey\Spotify\Object\Device;
 use Lorey\Spotify\Object\PagedResponse;
-use Lorey\Spotify\Object\Response;
-use Lorey\Spotify\Object\Track;
 
 
 class Spotify
 {
+    const API_VERSION = 'v1';
+
+    use Tracks;
+    use Artists;
+    use Albums;
+
     private $client;
 
-    public function __construct(ApiClient $client)
+    public function __construct(Client $client)
     {
         $this->client = $client;
-    }
+	}
 
     public function search($q, $type = 'album,artist,playlist,track'): PagedResponse
     {
@@ -39,16 +41,6 @@ class Spotify
     public function searchArtist($q): PagedResponse
     {
         return $this->search($q, 'artist');
-    }
-
-    public function getTrack($id): PagedResponse
-    {
-        return $this->client->get(new Endpoint('/tracks/{id}', Track::class), compact('id'));
-    }
-
-    public function getTracks(...$ids): PagedResponse
-    {
-        return $this->client->get(new Endpoint('/tracks', Track::class), compact('ids'));
     }
 
     public function transferPlayback(Device $device, bool $play = true): void
